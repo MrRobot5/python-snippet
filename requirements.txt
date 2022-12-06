@@ -1,0 +1,5 @@
+requests
+BeautifulSoup4
+pytesseract
+urllib2
+cookielib

@@ -1,0 +1,15 @@
+print "reverse file close!"
+original.close()
+target.close()
+target.write(EachLine.lstrip())
+for EachLine in AllLines:
+AllLines.reverse()
+AllLines = original.readlines()
+target = open(newpath, 'w')
+print "r 文件名：", newpath
+newpath = path[0: path.rindex('/')] + "/reverse.txt"
+print "o 文件名：", original.name
+original = open(path, "r")
+path = raw_input("需要转换的文件路径：")
+#Read file
+# -*- coding: UTF-8 -*-
