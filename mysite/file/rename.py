@@ -4,12 +4,17 @@
 
 import os
 
-path = 'D:/dongdongFile/interview'
-for file in os.listdir(path):
-    filename = file.decode('gbk')
-    #print(filename)
-    if (filename.find('txt') != -1 and len(filename.split(' ')) == 2):
-        title = filename[0: filename.find('.txt')]
-        new = title.split(' ')[1] + ' ' + title.split(' ')[0] + '.txt'
-        print(new)
-        os.rename(os.path.join(path, filename), os.path.join(path, new))
+PATH = 'e:/export/_posts'
+
+
+def filename_format():
+    for filename in os.listdir(PATH):
+        # filename.find('txt') != -1 and len(filename.split(' ')) == 2
+        if filename.startswith('20') and filename.endswith('md'):
+            title = filename[0: filename.find('.')]
+            print(title)
+            os.rename(os.path.join(PATH, filename), os.path.join(PATH, filename.replace('笔记', 'Note')))
+
+
+if __name__ == '__main__':
+    filename_format()
