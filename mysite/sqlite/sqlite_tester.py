@@ -23,7 +23,7 @@ cursor.execute('''insert into user(id,name) values(null,'xiaoqiang')''')
 conn.commit()
 
 cursor.execute('SELECT * FROM user')
-print cursor.fetchall()
+print(cursor.fetchall())
 
 # 修改id=1记录中的name为xiaoming
 cursor.execute('''update user set name='xiaoming' where id=1''')

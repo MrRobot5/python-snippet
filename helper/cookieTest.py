@@ -11,12 +11,16 @@ import requests
 from bs4 import BeautifulSoup
 
 
-# 将cookies转换成字典形式，zhihu_cookie为保存的cookie文件，跟程序处在同一路径
 def get_cookie():
-    with open('j-one.jd.com.cookie', 'r') as f:
+    """
+    将cookie 文件转换成字典形式
+    :return:
+    """
+    with open('cookie.txt', 'r') as f:
         cookies = {}
         for line in f.read().split(';'):
-            name, value = line.strip().split('=', 1)  # 1代表只分割一次
+            # 1代表只分割一次
+            name, value = line.strip().split('=', 1)
             cookies[name] = value
         return cookies
 
@@ -47,7 +51,7 @@ def fetch_jone_html():
     # 获取自定义属性值
     alink = soup.select("a[name='a_groupConfigPage_hisBtn']")
     for link in alink:
-        print link["data-key"]
+        print(link["data-key"])
 
 
 def fetch_jone_file():
@@ -65,4 +69,6 @@ def fetch_jone_file():
 
 if __name__ == '__main__':
     # fetch_jone_html()
-    fetch_jone_file()
+    # fetch_jone_file()
+    result = get_cookie()
+    print(result)

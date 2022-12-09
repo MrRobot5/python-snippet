@@ -19,7 +19,7 @@ def run_pubsub():
     count = 0
     # we can listen to subscription messages by iterating over the result of pubsub.listen()
     for item in pubsub.listen():
-        print item
+        print(item)
         count += 1
         if count == 4:
             pubsub.unsubscribe()

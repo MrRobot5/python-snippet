@@ -11,7 +11,7 @@ import os
 
 url = "http://xjzw.th28.cn/default_pay_template/images/yzm.jsp?0.7855853862762292"
 resp = requests.get(url)
-filename = "/tmp/captchas/" + str(uuid.uuid4()) + ".bmp"
+filename = "captchas/" + str(uuid.uuid4()) + ".bmp"
 with open(filename, 'wb') as f:
     for chunk in resp.iter_content(chunk_size=1024):
         if chunk:  # filter out keep-alive new chunks

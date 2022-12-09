@@ -15,14 +15,14 @@ headers = {
 
 # 测试--结果json 数据结构解析
 def load_json():
-    f = file('Y578lG8pB7EM.json')
+    f = open("Y578lG8pB7EM.json", "r", encoding='UTF-8')
     result = json.load(f)
 
     for month in result["data"]:
-        print "current month is : {}".format(month["month"].encode('utf-8'))
+        print("current month is : {}".format(month["month"].encode('utf-8')))
         pics = month["list"]
         for pic in pics:
-            print pic["src"]
+            print(pic["src"])
 
 
 def download(pic_src):
@@ -30,18 +30,18 @@ def download(pic_src):
     response = session.get(pic_src, headers=headers, timeout=50)
     filename = str(pic_src).split("?")[0].split("/")[-1]
     print('--filename:[{}] download success'.format(filename))
-    f = open("/tmp/foo/douyu/soso/{}".format(filename), "wb")
+    f = open("soso/{}".format(filename), "wb")
     f.write(response.content)
     f.close()
 
 
 def download_pic_list(file_path):
-    print "current file_path is : {}".format(file_path)
-    f = file(file_path)
+    print("current file_path is : {}".format(file_path))
+    f = open(file_path, "r", encoding='UTF-8')
     result = json.load(f)
 
     for month in result["data"]:
-        print "current month is : {}".format(month["month"].encode('utf-8'))
+        print("current month is : {}".format(month["month"].encode('utf-8')))
         pics = month["list"]
         for pic in pics:
             download(pic["src"])
@@ -51,13 +51,13 @@ def download_pic_list(file_path):
 def get_next_feed_id(content):
     result = json.loads(content)
     if len(result["data"]) == 0:
-        print "抓取结束！"
+        print("抓取结束！")
         return ""
 
     last_month = result["data"][-1]
     last_pic = last_month["list"][-1]
     next_feed_id = last_pic["feed_id_str"]
-    print next_feed_id
+    print(next_feed_id)
     return next_feed_id
 
 
@@ -66,7 +66,7 @@ def fetch_json(json_url, current_feed_id):
     session = requests.Session()
     response = session.get(json_url, headers=headers, timeout=50)
     print('--url:[{}] download success'.format(json_url))
-    f = open("/tmp/foo/douyu/douyu-pics-{}.txt".format(current_feed_id), "wb")
+    f = open("douyu-pics-{}.txt".format(current_feed_id), "wb")
     f.write(response.content)
     f.close()
 
@@ -93,5 +93,6 @@ def step_2():
 # step_1 分页获取图片路径集合
 # step_2 下载图片集合
 if __name__ == '__main__':
+    load_json()
     # step_1()
     step_2()
