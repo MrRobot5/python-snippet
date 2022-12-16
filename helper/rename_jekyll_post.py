@@ -4,7 +4,7 @@ import os
 import time
 
 # 文档所在的目录
-PATH = '/yangpan3/MrRobot5.github.io/notes'
+PATH = '/Users'
 
 
 def get_file_mtime(file_path):
@@ -30,6 +30,9 @@ def name_format(file_name, prefix):
 
 
 def append_yaml(file_name):
+    """
+    按照jekyll 要求添加内容header
+    """
     print('append file {}'.format(file_name))
     file_path = os.path.join(PATH, file_name)
     modify_time = get_file_mtime(file_path)
@@ -42,6 +45,7 @@ def append_yaml(file_name):
         file.write('date:   {} +0800\n'.format(modify_time))
         file.write('categories: jekyll update\n')
         file.write('---\n')
+        file.write('\n')
         file.write(content)
     name_format(file_name, modify_time)
 
@@ -49,5 +53,5 @@ def append_yaml(file_name):
 if __name__ == '__main__':
     for filename in os.listdir(PATH):
         # print filename
-        if filename.endswith('md'):
+        if filename.endswith('md') or filename.endswith('markdown'):
             append_yaml(filename)

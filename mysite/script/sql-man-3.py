@@ -8,5 +8,5 @@ with open("C:\\Users\\yangpan3\\Desktop\\append.txt") as f:
 
         pins += "'" + line.strip() + "',"
 
-print pins[0: len(pins) - 1]
+print(pins[0: len(pins) - 1])
 

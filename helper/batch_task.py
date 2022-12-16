@@ -9,9 +9,12 @@
 import requests
 import jsonpath
 
+# 需要请求的 url pattern
+REQUEST_API = 'http://example.foo.com/api/oe/ticket/{}'
+
 cookies = {
     'mba_muid': '16685236794961410676977',
-    'sso.jd.com': 'BJ.51BECF6E24F9A37EB6D8441FF2410E79.7920221209134507',
+    '登录cookie_name': '3620221216142312',
 }
 
 headers = {
@@ -30,7 +33,7 @@ def get_json(param):
     :param param: 任务id
     :return: ['yangpan23']
     """
-    response = requests.get('http://easyops.jdl.com/api/oe/ticket/tickets/' + param, cookies=cookies, headers=headers, verify=False)
+    response = requests.get(REQUEST_API.format(param), cookies=cookies, headers=headers, verify=False)
     # response.json() returns a JSON object of the result
     json = response.json()
 
@@ -49,7 +52,10 @@ def read_lines():
 
 
 if __name__ == '__main__':
-    for line in read_lines():
+    # 1.source
+    source = read_lines()
+    # 2.loop and handle
+    for line in source:
         # strip() with leading and trailing whitespace removed.
         print("{} {}".format(line.strip(), get_json(line)[0]))
 

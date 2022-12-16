@@ -5,7 +5,7 @@
 total = 0
 while total < 61880350:
     total += 1000000
-    print "delete from sha_pin_new where id < {};".format(total)
+    print("delete from sha_pin_new where id < {};".format(total))
 
 
 

@@ -34,10 +34,9 @@ headers = {
 }
 
 
-# 获取j-one 分组配置文件列表
-def fetch_jone_html():
+def fetch_html():
     session = requests.Session()
-    url = 'http://j-one.jd.com/systemApp/groupController/toConfigPage/75718'
+    url = 'http://www.zhihu.com/app/group/toConfigPage/75718'
 
     response = session.post(url, data={"appId": 30099, "editFlag": True, "envType": "PRODUCTION"}, headers=headers,
                             cookies=get_cookie(), verify=False)
@@ -49,22 +48,9 @@ def fetch_jone_html():
 
     soup = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
     # 获取自定义属性值
-    alink = soup.select("a[name='a_groupConfigPage_hisBtn']")
+    alink = soup.select("a[name='a_group_hisBtn']")
     for link in alink:
         print(link["data-key"])
-
-
-def fetch_jone_file():
-    session = requests.Session()
-    url = 'http://j-one.jd.com/systemApp/groupController/toViewFileCfgPage/75718'
-
-    response = session.post(url, data={"appId": 30099, "keyVal": "WEB-INF/classes/jdq3.bak.properties", "editFlag": False, "envType": "PRODUCTION"}, headers=headers,
-                            cookies=get_cookie(), verify=False)
-    html = response.content
-
-    # 将获取到的页面源码写入zhihu.html文件中
-    with open('zhihu.html', 'w') as f:
-        f.write(html)
 
 
 if __name__ == '__main__':
