@@ -26,7 +26,7 @@ def generate_time_slice(times):
     total = 0
     time_slice = []
     for index in range(times):
-        item = random.uniform(30, 75)
+        item = random.uniform(15, 30)
         time_slice.append(item)
         total += item
     plus_total(total)

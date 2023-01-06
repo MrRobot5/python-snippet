@@ -1,10 +1,20 @@
 # encoding: utf-8
 
+"""
+功能：把 markdown 文章格式化为jekyll post。
+工作环境：windows
+原理：
+1. 扫描我的文档目录，查找 markdown 文件。
+2. 按照jekyll 要求添加内容header
+3. 文件rename, 按照jekyll 要求格式化文件名称
+
+"""
+
 import os
 import time
 
 # 文档所在的目录
-PATH = '/Users'
+PATH = 'C:/Users/yangpan3/Documents'
 
 
 def get_file_mtime(file_path):
