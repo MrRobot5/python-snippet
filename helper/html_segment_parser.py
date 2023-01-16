@@ -19,6 +19,7 @@ def parse_script():
 
     result = []
     for element in elements:
+        print(element.text)
         result.append(get_attrs(element, "id") + element.text)
 
     print(result)
