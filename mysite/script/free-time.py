@@ -4,8 +4,11 @@ import random
 import pyperclip
 import datetime
 
+"""
+可以借助 shell alias, 配置脚本。C:/Program Files/Git/etc/bash.bashrc
+"""
 
-# 假动作
+# fake actions
 CHOICES = ["./swagger-1.exe", "./swagger-calendar.exe", "./batch-exe.sh"]
 
 
@@ -61,7 +64,7 @@ if __name__ == '__main__':
     # 需要的打击时间间隔，单位：小时
     click_hours = int(sys.argv[2])
 
-    segments = ["./prepare.exe"]
+    segments = ["move"]
     segments += generate_hold_segment(hold_hours)
     # alias move='/e/export/jeff-info'
     segments.append("move")
