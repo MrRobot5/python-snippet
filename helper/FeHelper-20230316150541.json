@@ -1,0 +1,30 @@
+[
+    {
+        "id": "1775468",
+        "message_code": "RW688769485359947776",
+        "message_type": "17",
+        "message_source": "",
+        "title": "客经挖潜",
+        "content": "天津北纬信息技术有限公司",
+        "owner": "chensong11",
+        "variable": "{\"serviceLine\":\"\",\"levelTwoDesc\":\"客经挖潜\",\"city\":\"\",\"levelOneDesc\":\"挖潜快递业务\",\"regionName\":\"华北\",\"sellerName\":\"天津北纬信息技术有限公司\",\"customerCode\":\"C20200629388505\",\"hasSellerMember\":0,\"sellerNo\":\"王女士\",\"chanceStage\":-999999,\"levelOneId\":\"5\",\"presentationTime\":\"2023-03-31\",\"secondDepart\":\"销售拓展部\",\"clientType\":0,\"province\":\"\",\"assignStatus\":0,\"requestId\":\"13683\",\"exptId\":\"\",\"owner\":\"chensong11\",\"sellerContactMobile\":\"15201400950\",\"certificateCode\":\"\",\"isDelete\":1,\"updateUser\":\"\",\"statusTest\":\"待处理\",\"sellerContactName\":\"王女士\",\"chanceId\":-999999,\"phoneNumber\":\"\",\"detailAdd\":\"\",\"contractSerialCode\":\"\",\"district\":\"\",\"receiptNo\":\"客经\",\"createUser\":\"jiayuebin\",\"status\":1}",
+        "remark": "",
+        "parent_id": "6",
+        "company_code": "",
+        "company_name": "",
+        "biz_account": "",
+        "business_code": "",
+        "business_status": "",
+        "is_delete": "0",
+        "create_user": "jiayuebin",
+        "create_time": "2023/3/16 15:24",
+        "expire_time": "",
+        "start_time": "",
+        "update_user": "",
+        "update_time": "2023/3/16 15:24",
+        "message_status": "0",
+        "business_no": "客经",
+        "finish_mode": "1",
+        "action": "COMPANY_POTENTIAL"
+    }
+]
