@@ -3,6 +3,8 @@
 """
 cookie 模拟登录请求html
 
+pip install requests
+
 https://www.jianshu.com/p/c94de9f1ef7c requests读取本地cookie实现模拟登录
 https://blog.csdn.net/dnxbjyj/article/details/70254428 requests和BeautifulSoup库的基本用法
 
