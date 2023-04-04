@@ -18,7 +18,11 @@ PATH = 'C:/Users/yangpan3/Documents'
 
 
 def get_file_mtime(file_path):
-
+    """
+    获取文件的创建时间（格式：%Y-%m-%d %H:%M:%S）
+    @param file_path: 文件路径
+    @return: 2023-03-29 10:17:20
+    """
     m_ti = time.ctime(os.path.getmtime(file_path))
 
     # Using the timestamp string to create a
@@ -34,16 +38,18 @@ def name_format(file_name, prefix):
     """
     按照jekyll 要求格式化文件名称
     :param file_name: 
-    :param prefix: 
+    :param prefix: 文件创建时间 2023-03-29 10:17:20
     """
-    os.rename(os.path.join(PATH, filename), os.path.join(PATH, '{}-{}'.format(prefix[0: 10], file_name.replace(' ', '-'))))
+    format_file_name = '{}-{}'.format(prefix[0: 10], file_name.replace(' ', '-'))
+    os.rename(os.path.join(PATH, filename), os.path.join(PATH, format_file_name))
+    print('final file {}'.format(format_file_name))
 
 
 def append_yaml(file_name):
     """
     按照jekyll 要求添加内容header
     """
-    print('append file {}'.format(file_name))
+    print('process file {}'.format(file_name))
     file_path = os.path.join(PATH, file_name)
     modify_time = get_file_mtime(file_path)
     with open(file_path, 'r+', encoding='UTF-8') as file:
@@ -64,4 +70,5 @@ if __name__ == '__main__':
     for filename in os.listdir(PATH):
         # print filename
         if filename.endswith('md') or filename.endswith('markdown'):
+            print('find file {}'.format(filename))
             append_yaml(filename)
