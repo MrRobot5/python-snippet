@@ -1,6 +1,9 @@
 
+"""
+解析 url 中的username 信息
+"""
 if __name__ == '__main__':
-    foo = "https://idoc.com:.@:com@/sites/SXHT"
+    foo = "https://wenku.baidu.com:.@:com@/sites/SXHT"
 
     index = foo.find("://")
     protocol = foo[:index]
