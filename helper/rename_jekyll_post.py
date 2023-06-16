@@ -59,8 +59,14 @@ def append_yaml(file_name):
         file.write('layout: post\n')
         file.write('title:  "{}"\n'.format(file_name[0: file_name.find('.')]))
         file.write('date:   {} +0800\n'.format(modify_time))
-        file.write('categories: jekyll update\n')
+        # 目前已有的分类： 学习笔记 源码阅读 实战问题 算法
+        file.write('categories: 源码阅读\n')
+        # 默认取标题生成 tags
+        file.write('tags: {}\n'.format(file_name.replace("-", " ")))
         file.write('---\n')
+        file.write('\n')
+        file.write('* content\n')
+        file.write('{:toc}\n')
         file.write('\n')
         file.write(content)
     name_format(file_name, modify_time)
