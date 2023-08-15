@@ -9,7 +9,7 @@ es = Elasticsearch([{'host':'192.168.152.55','port':9200}])
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html
 # http://localhost:9200/my-index/test-type/5/_source
 content = es.get(index="get-together", doc_type="event", id=100)
-print content['_id'], content['_source']['title']
+print (content['_id'], content['_source']['title'])
 
 # $ curl -XDELETE 'http://localhost:9200/twitter/tweet/1?timeout=5m'
 # content = es.delete(
@@ -38,7 +38,7 @@ content = es.mget(
 )['docs']
 
 for x in content:
-    print x['_type'], x['_source']['timestamp']
+    print(x['_type'], x['_source']['timestamp'])
 
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html
 # es.reindex(body={
@@ -99,7 +99,7 @@ def top5():
 
 def sourcefilter():
 
-    print "--search-request-source-filtering--"
+    print("--search-request-source-filtering--")
     result = es.search(
         index='bing-life',
         doc_type="Snippet",
@@ -114,7 +114,8 @@ def sourcefilter():
     )['hits']['hits']
 
     for item in result:
-        print item['_id'], item['_source']
+        print(item['_id'], item['_source'])
+
 
 # top5
 top5()

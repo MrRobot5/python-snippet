@@ -3,6 +3,10 @@ import urllib2
 import json
 import time
 
+"""
+快递单号轮询查询
+"""
+
 
 def query():
     """query express num"""
@@ -10,7 +14,7 @@ def query():
     content = response.read()
     msg = json.loads(content)
     last = msg['data'][0]
-    print last['time'] + "|" + last['context']
+    print(last['time'] + "|" + last['context'])
 
 
 def execute():
@@ -21,4 +25,5 @@ def execute():
         time.sleep(60)
 
 
-execute()
+if __name__ == '__main__':
+    execute()

@@ -22,7 +22,7 @@ with open("d:/log.txt") as f:
             target.writelines(line)
         else:
             target.write(line)
-        print line.decode('gbk')
+        print(line.decode('gbk'))
 
 target.close()
 

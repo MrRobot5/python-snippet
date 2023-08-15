@@ -9,9 +9,6 @@
 import requests
 import jsonpath
 
-# 需要请求的 url pattern
-REQUEST_API = 'http://example.foo.com/api/oe/ticket/{}'
-
 cookies = {
     'mba_muid': '16685236794961410676977',
     '登录cookie_name': '3620221216142312',
@@ -33,7 +30,7 @@ def get_json(param):
     :param param: 任务id
     :return: ['yangpan23']
     """
-    response = requests.get(REQUEST_API.format(param), cookies=cookies, headers=headers, verify=False)
+    response = requests.get('http://example.foo.com/api/oe/ticket/{}'.format(param), cookies=cookies, headers=headers, verify=False)
     # response.json() returns a JSON object of the result
     json = response.json()
 
@@ -46,7 +43,7 @@ def read_lines():
     打开当前目录下的 input.txt， 读取文件行
     :return: ['line']
     """
-    original = open('input.txt', "r")
+    original = open('../input.txt', "r")
     lines = original.readlines()
     return lines
 

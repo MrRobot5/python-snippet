@@ -22,11 +22,11 @@ class MyHTMLParser(HTMLParser):
                     find = True
             if find:
                 self.tag = True
-                print "Encountered a start tag:", attrs
+                print("Encountered a start tag:", attrs)
 
     def handle_data(self, data):
         if self.tag:
-            print "Encountered some data  :", data
+            print("Encountered some data  :", data)
             self.content = data
             self.tag = False
 
@@ -40,7 +40,7 @@ for x in range(0, 30 * 12):
 
     # Formatting datetime
     suffix = today.strftime("%Y%m%d")
-    print "request day:", suffix
+    print("request day:", suffix)
     response = urllib2.urlopen('http://cn.bing.com/cnhp/life?currentDate={0}'.format(suffix))
     content = response.read()
     parser.feed(content)
