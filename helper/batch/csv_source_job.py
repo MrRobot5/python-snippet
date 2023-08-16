@@ -21,7 +21,7 @@ def get_source_data(param):
     return response.json()
 
 
-def update(site):
+def send_http_request(site):
     """
     发起数据 update SQL
     @param site: json 格式
@@ -32,7 +32,7 @@ def update(site):
     print(response.json())
 
 
-def run(row):
+def process_line(row):
     site_code_ = row['site_code']
     source = get_source_data(site_code_)
     data = source["data"]
@@ -41,7 +41,7 @@ def run(row):
 
     siteName = data.get("siteName")
     siteCode = data.get("siteCode")
-    update({"c1": siteCode, "c2": siteName, "c3": site_code_, "lines": row['count(*)']})
+    send_http_request({"c1": siteCode, "c2": siteName, "c3": site_code_, "lines": row['count(*)']})
 
 
 if __name__ == '__main__':
@@ -49,4 +49,4 @@ if __name__ == '__main__':
         reader = csv.DictReader(csvfile)
         for row in reader:
             print(row['count(*)'], row['site_code'])
-            run(row)
+            process_line(row)

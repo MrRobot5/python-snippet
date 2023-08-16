@@ -2,7 +2,7 @@
 
 """
 批量刷新线上数据。
-@see batch_task.py 类似功能
+@see txt_source_job.py 类似功能
 @since 2023-05-06 15:02:01
 """
 
@@ -10,10 +10,9 @@ import requests
 import json
 
 headers = {
-    'lop-pin': 'dazhanghong',
-    'LOP-DN': '*/*',
-    'accept': '*/*',
-    'Content-Type': 'application/json',
+    'app-token': 'noop',
+    "accept": "*/*",
+    "Content-Type": "application/json"
 }
 
 
@@ -49,7 +48,7 @@ def update(site):
     print(response.json())
 
 
-def run(param):
+def process_line(param):
     source = get_source_data(param)
     data = source["data"]
     # 不符合业务需要的数据， skip
@@ -71,6 +70,6 @@ if __name__ == '__main__':
     # 线上数据量比较大，根据id 逆向遍历
     for i in range(1907714, -1, -1):
         print(i)
-        run(i)
+        process_line(i)
     # get_source_data(400282)
     # load_meta_data()
