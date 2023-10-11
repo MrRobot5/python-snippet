@@ -23,7 +23,7 @@ def get_file_mtime(file_path):
     @param file_path: 文件路径
     @return: 2023-03-29 10:17:20
     """
-    m_ti = time.ctime(os.path.getmtime(file_path))
+    m_ti = time.ctime(os.path.getctime(file_path))
 
     # Using the timestamp string to create a
     # time object/structure
