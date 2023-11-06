@@ -6,6 +6,7 @@ import time
 import shutil
 
 # 照片copy 的目标文件夹
+# r-strings 作用：没有转义特殊或不能打印的字符。
 PHOTOS = r"D:\photos"
 
 
