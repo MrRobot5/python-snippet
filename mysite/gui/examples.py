@@ -1,3 +1,9 @@
+# encoding: utf-8
+
+"""
+pip install pyautogui
+
+"""
 import pyautogui
 
 screenWidth, screenHeight = pyautogui.size()
