@@ -36,7 +36,7 @@ def find_direct_action():
 
 
 # fake actions
-CHOICES = ['panzhugui', 'availability', 'panzhugui', 'availability']
+CHOICES = ['panzhugui', 'availability', './generateqiuhan.exe &', 'availability']
 
 
 total_minutes = 0
