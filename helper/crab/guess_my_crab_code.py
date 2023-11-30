@@ -2,7 +2,7 @@
 
 """
     主程序，尝试匹配正确的提取码
-    已知：部分提取码和密码
+    已知：部分提取码(我的螃蟹券水洗了，一部分提取码看不到了)和密码
     需要重复尝试，猜出正确的提取码
 
     实现思路参考：http://www.cnblogs.com/hearzeus/p/5166299.html
@@ -78,11 +78,11 @@ def run():
         try:
             post_request(code, checkcode)
         except:
-            print "post error, retry!"
+            print("post error, retry!")
             try:
                 post_request(code, checkcode)
             except:
-                print "post error again!"
+                print("post error again!")
 
         time.sleep(0.1)
 

@@ -1,14 +1,16 @@
-# python 练习工具
+# python 工具库
 
 ---
 
 # ⚔helper
 
-| NO  | 文件                     | 功能       | 备注                  |
-| --- | ---------------------- | -------- | ------------------- |
-| 1   | batch_task.py          | 批量请求关键信息 | 从 http api 快速获取信息   |
-| 2   | soso_pic_downloader.py | 爬取斗鱼相册   | json 解析，文件下载        |
-| 3   | html_segment_parser.py | html 解析  | 快速提取html 片段，得到需要的信息 |
+| NO  | 文件                     | 功能         | 备注                  |
+| --- | ---------------------- | ---------- | ------------------- |
+| 1   | batch_task.py          | 批量请求关键信息   | 从 http api 快速获取信息   |
+| 2   | soso_pic_downloader.py | 爬取斗鱼相册     | json 解析，文件下载        |
+| 3   | html_segment_parser.py | html 解析    | 快速提取html 片段，得到需要的信息 |
+| 4   | guess_my_crab_code.py  | 尝试匹配正确的提取码 | 验证码识别、网络请求提交、日志文件   |
+| 5   | example.py             | 词云         |                     |
 
 # 🔨wheel
 

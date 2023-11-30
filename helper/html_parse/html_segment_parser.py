@@ -13,7 +13,7 @@ import logging
 
 
 def parse_script():
-    html = open("../iciba.html", "r", encoding='UTF-8')
+    html = open("../../html/iciba.html", "r", encoding='UTF-8')
     soup = BeautifulSoup(html.read(), 'html.parser')
     elements = soup.select('.btn')
 

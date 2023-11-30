@@ -36,7 +36,7 @@ def find_direct_action():
 
 
 # fake actions
-CHOICES = ['panzhugui', 'availability', './generateqiuhan.exe &', 'availability']
+CHOICES = ['panzhugui', 'availability', './exec_dispatch.sh', 'availability']
 
 
 total_minutes = 0
@@ -91,8 +91,9 @@ if __name__ == '__main__':
     # finally, action
     segments.append(direct_action)
     final_command = ";".join(segments)
-    pyperclip.copy(final_command)
 
     print(final_command)
     print("-- hold position to: ", (datetime.datetime.now() + datetime.timedelta(minutes=total_minutes)).strftime("%Y-%m-%d %H:%M:%S"))
+
+    pyperclip.copy(final_command)
     print("-- copied to clipboard!")

@@ -43,7 +43,7 @@ def read_lines():
     打开当前目录下的 input.txt， 读取文件行
     :return: ['line']
     """
-    original = open('../input.txt', "r")
+    original = open('input.txt', "r")
     lines = original.readlines()
     return lines
 
