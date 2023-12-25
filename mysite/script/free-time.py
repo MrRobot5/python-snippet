@@ -90,6 +90,8 @@ if __name__ == '__main__':
 
     # finally, action
     segments.append(direct_action)
+    # who am i
+    segments.append("rm temp*")
     final_command = ";".join(segments)
 
     print(final_command)

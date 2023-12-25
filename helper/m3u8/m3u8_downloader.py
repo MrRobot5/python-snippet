@@ -36,7 +36,7 @@ def mission(url, index):
 download_path = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
 
-def checkdir():
+def check_dir():
     path = "/tmp/foo/m3u8-{}".format(download_path)
     if not os.path.exists(path):
         os.mkdir(path)
@@ -44,7 +44,7 @@ def checkdir():
 
 
 if __name__ == "__main__":
-    checkdir()
+    check_dir()
     pool = Pool(20)
     for n in range(1, 3):
         url = "https://f1.media.brightcove.com/1/1362235890001/5796758914001/1362235890001_5796758914001_s-{}.ts?pubId=1362235890001&videoId=1655020599001".format(
