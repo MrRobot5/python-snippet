@@ -7,31 +7,60 @@
 """
 
 import requests
+import pandas as pd
+import sqlalchemy as sa
+from sqlalchemy import create_engine
+import time
 from datetime import datetime, timedelta
 
+
+headers = {
+    'authority': 'stock.xueqiu.com',
+    'accept': 'application/json, text/plain, */*',
+    'accept-language': 'zh-CN,zh;q=0.9',
+    'cache-control': 'no-cache',
+    'origin': 'https://xueqiu.com',
+    'pragma': 'no-cache',
+    'referer': 'https://xueqiu.com/S/SZ000625',
+    'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-site',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
+}
+
+session = requests.Session()
+engine = create_engine("sqlite:///database_SH601088.db", pool_recycle=3600, echo=True)
 
 # 函数用于获取数据并在数据不为空时更新时间戳
 def fetch_data(timestamp):
     # 构建请求URL
-    url = f"https://www.zhihu.com/api/question/queryNumberDecrypt?decryptFields=undefined&from={timestamp}"
+    url = f"https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601088&begin={timestamp}&period=day&type=before&count=-142&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance"
 
     # 发送GET请求
-    response = requests.get(url)
+    
+    response = session.get(url, headers=headers)
 
     # 检查响应状态码
-    if response.status_code == 200:
-        data = response.json()
-
-        # 如果数据不为空，则更新时间戳并递归调用函数
-        if data:  # 根据实际返回数据结构判断是否为空
-            # 减去140天
-            new_timestamp = next_timestamp(timestamp)
-            # 递归调用函数
-            fetch_data(new_timestamp)
-        else:
-            print("No more data available.")
+    response_data = response.json()["data"]
+    
+    # 如果数据不为空，则更新时间戳并递归调用函数
+    if response_data:  # 根据实际返回数据结构判断是否为空
+        c = response_data["column"]
+        d = response_data["item"]
+        data = pd.DataFrame(d, columns=c)
+        data['timestamp'] = data['timestamp'].apply(lambda x: time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x / 1000)))
+        # if_exists{‘fail’, ‘replace’, ‘append’}, default ‘fail’
+        data.to_sql("kline_data", con=engine, if_exists="append")
+        # 减去140天
+        new_timestamp = next_timestamp(timestamp)
+        # 递归调用函数
+        fetch_data(new_timestamp)
     else:
-        print(f"Failed to fetch data, status code: {response.status_code}")
+        print("No more data available.")
+    
 
 
 def next_timestamp(timestamp):
@@ -49,8 +78,9 @@ def next_timestamp(timestamp):
 
 
 if __name__ == '__main__':
+    session.get('https://xueqiu.com/?_=lqvl7ow8', headers=headers)
     # 初始时间戳
     initial_timestamp = datetime.now().timestamp()
 
     # 调用函数开始处理
-    fetch_data(initial_timestamp)
+    fetch_data(int(initial_timestamp * 1000))
