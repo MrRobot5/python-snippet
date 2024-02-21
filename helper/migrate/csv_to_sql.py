@@ -10,7 +10,7 @@ table_name = 'your_table_name'  # replace with your table name
 
 
 def csv_to_insert_sql(csv_file):
-    with open(csv_file, 'r') as file:
+    with open(csv_file, 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
         headers = next(reader)  # header row
 
