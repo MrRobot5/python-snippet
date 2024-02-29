@@ -26,6 +26,7 @@ with open(filename, 'w') as file:
     file.write('import pyautogui \n')
     file.write('import random \n')
     file.write('offset = random.uniform(-50, 5) \n')
+    # 注意： 如果没能成功定位，会直接提示 ImageNotFoundException. 容易误导🎈
     image_location = pyautogui.locateOnScreen("Snipaste_2023-11-27_11-00-31.png", grayscale=True)
     position = pyautogui.center(image_location)
     print(position.x, position.y)
