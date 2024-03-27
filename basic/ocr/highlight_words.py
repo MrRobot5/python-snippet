@@ -14,8 +14,8 @@ except ImportError:
 识别字符串，高亮标识
 ref: https://zhuanlan.zhihu.com/p/448253254
 
+@since 2023年12月05日 20:03:39
 """
-
 
 img = cv2.imread('Snipaste_2023-11-30_16-20-08.png')
 
@@ -35,6 +35,7 @@ wm = np.median(width_list)
 
 tess_text = pytesseract.image_to_data(img, output_type=Output.DICT, lang='chi_sim')
 for i in range(len(tess_text['text'])):
+    print(tess_text['text'][i])
     word_len = len(tess_text['text'][i])
     if word_len >= 1:
         world_w = int(wm * word_len)
@@ -46,5 +47,6 @@ for i in range(len(tess_text['text'])):
         draw.text((x, y - 20), tess_text['text'][i], (255, 0, 0), font=font)
         img = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR)
 
-cv2.imshow("TextBoundingBoxes", img)
+# cv2.imshow("TextBoundingBoxes", img)
+cv2.imwrite('output.png', img)
 cv2.waitKey(0)
