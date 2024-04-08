@@ -6,6 +6,7 @@ from PIL import Image
 from flask import Flask, request
 from paddleocr import PaddleOCR
 
+import os
 
 """
 启动一个简单的HTTP服务器并处理 autojs 的POST请求。
@@ -34,6 +35,20 @@ def handle_say():
     name = request.args.get('name', 'Guest')
     print(f"Name: {name}")
     return f"Hello, {name}!", 200
+
+@app.route('/handle/upload', methods=['POST'])
+def upload_file():
+    """
+    上传截图文件
+    @return: "File uploaded successfully"
+    """
+    file = request.files['file']
+    # 如果用户没有选择文件，浏览器也会提交一个空的文件部分
+    if file.filename == '':
+        return 'No selected file'
+    # file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+    file.save(file.filename)
+    return 'File uploaded successfully'
 
 @app.route('/handle/ocr', methods=['POST'])
 def handle_ocr():
