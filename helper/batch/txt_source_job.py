@@ -28,7 +28,7 @@ def get_json(param):
     """
     请求 Http 接口，获取Json 数据
     :param param: 任务id
-    :return: ['yangpan23']
+    :return: ['Moose']
     """
     response = requests.get('http://example.foo.com/api/oe/ticket/{}'.format(param), cookies=cookies, headers=headers, verify=False)
     # response.json() returns a JSON object of the result
