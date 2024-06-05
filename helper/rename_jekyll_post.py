@@ -8,10 +8,15 @@
 2. 按照jekyll 要求添加内容header
 3. 文件rename, 按照jekyll 要求格式化文件名称
 
+@since 2024年6月4日 20:22:06
 """
 
 import os
-import time
+from datetime import datetime
+import re
+
+# 定义一个正则表达式，匹配以4位数字开头的字符串
+pattern = re.compile(r'^\d{4}')
 
 # 文档所在的目录
 PATH = 'C:/Users/yangpan3/Documents'
@@ -23,15 +28,15 @@ def get_file_mtime(file_path):
     @param file_path: 文件路径
     @return: 2023-03-29 10:17:20
     """
-    m_ti = time.ctime(os.path.getctime(file_path))
+    # 获取文件的最后修改时间
+    mod_time = os.path.getmtime(file_path)
 
-    # Using the timestamp string to create a
-    # time object/structure
-    t_obj = time.strptime(m_ti)
+    # 将时间戳转换为datetime对象
+    mod_datetime = datetime.fromtimestamp(mod_time)
 
     # Transforming the time object to a timestamp
     # of ISO 8601 format
-    return time.strftime("%Y-%m-%d %H:%M:%S", t_obj)
+    return mod_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def name_format(file_name, prefix):
@@ -52,6 +57,7 @@ def append_yaml(file_name):
     print('process file {}'.format(file_name))
     file_path = os.path.join(PATH, file_name)
     modify_time = get_file_mtime(file_path)
+    print(modify_time)
     with open(file_path, 'r+', encoding='UTF-8') as file:
         content = file.read()
         file.seek(0, 0)
@@ -76,5 +82,9 @@ if __name__ == '__main__':
     for filename in os.listdir(PATH):
         # print filename
         if filename.endswith('md') or filename.endswith('markdown'):
-            print('find file {}'.format(filename))
-            append_yaml(filename)
+            # 跳过已经处理过的文档
+            if pattern.match(filename):
+                print('skip file {}'.format(filename))
+            else:
+                print('find file {}'.format(filename))
+                append_yaml(filename)
