@@ -22,7 +22,8 @@ def on_move(x, y):
 def on_click(x, y, button, pressed):
     # Button.left Released at (2587, 489)
     print('{0} {1} at {2} '.format(button, 'Pressed' if pressed else 'Released', (x, y)))
-    logging.info('Mouse clicked at ({0}, {1}) with {2}'.format(x, y, button))
+    if pressed:
+        logging.info('Mouse clicked at ({0}, {1}) with {2}'.format(x, y, button))
 
 # Collect events until released
 # A mouse listener is a threading.Thread, and all callbacks will be invoked from the thread.
