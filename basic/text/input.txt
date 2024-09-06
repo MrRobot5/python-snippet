@@ -1,0 +1,2 @@
+2024-09-06 13:13:26.147 580edf5e-ba54-40ad-9841-9ffe970bb06f [DEBUG]==> Preparing: UPDATE pc_foo_bill SET receive_status = ? WHERE id = ?
+2024-09-06 13:13:26.147 580edf5e-ba54-40ad-9841-9ffe970bb06f [DEBUG]==> Parameters: 3(Byte), 943041(Long)
