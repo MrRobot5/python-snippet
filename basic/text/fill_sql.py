@@ -10,6 +10,8 @@ prompt:
 @since 2024年7月17日 14:41:33 chat-gpt
 """
 
+# 打印出该脚本的顶层文档字符串。
+print(__doc__)
 
 def fill_sql_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
