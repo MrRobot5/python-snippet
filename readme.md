@@ -8,8 +8,6 @@
 
 ②**helper** 实践工具，有具体的使用场景
 
-
-
 # ⚔helper
 
 | NO  | 文件                     | 功能         | 备注                  |
@@ -94,3 +92,13 @@ http://graphite.wikidot.com/
 request 使用的是 urllib3，继承了urllib2的所有特性。Requests支持HTTP连接保持和连接池，支持使用cookie保持会话，支持文件上传，支持自动确定响应内容的编码，支持国际化的 URL 和 POST 数据自动编码。
 
 > There are many libraries to make an HTTP request in Python, which are [httplib](https://docs.python.org/2/library/httplib.html), [urllib](https://docs.python.org/2/library/urllib.html), [httplib2](https://github.com/httplib2/httplib2), [treq](https://github.com/twisted/treq), etc., but [requests](https://2.python-requests.org//en/master/) is the one of the best with cool features.
+
+
+
+# Tips
+
+## 关键字命名要注意
+
+basic 有个文件夹名是 thread，使用 pycharm debug 会报错
+
+`module 'thread' has no attribute 'start_new_thread'`
