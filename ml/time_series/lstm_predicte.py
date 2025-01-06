@@ -12,7 +12,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
 # 读取数据
-data = pd.read_csv('../candy/calls_data.csv', parse_dates=['timestamp'], index_col='timestamp')
+data = pd.read_csv('calls_data.csv', parse_dates=['timestamp'], index_col='timestamp')
 print(data.head())
 
 # 提取调用量数据
