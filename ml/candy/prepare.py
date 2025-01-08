@@ -16,10 +16,12 @@ input_filename = 'input.csv'
 output_filename = 'train.csv'
 
 # 使用pandas读取CSV文件
-df = pd.read_csv(input_filename)
-
+df = pd.read_csv(input_filename, parse_dates=['timestamp'])
 # 将timestamp列转换为datetime类型
-df['timestamp'] = pd.to_datetime(df['timestamp'])
+# df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+# 按照 timestamp 列的值进行升序排序
+df.sort_values(by='timestamp', ascending=True, inplace=True)
 
 # 过滤timestamp大于'2022-01-01'的数据
 df = df[df['timestamp'] > '2022-01-01']

@@ -34,9 +34,9 @@ fig, ax = plt.subplots()
 
 # 绘制折线图
 # 绘制折线图，并使用行索引用作x轴。
-ax.plot(data.index, data['close'], marker='o')
-ax.plot(data.index, data['macd'], marker='^')
-ax.plot(data.index, data['macd_diff'], marker='x')
+ax.plot(data.index, data['close'])
+ax.plot(data.index, data['macd'])
+ax.plot(data.index, data['macd_diff'])
 
 # 设置x轴标签
 ax.set_xticks(data.index)

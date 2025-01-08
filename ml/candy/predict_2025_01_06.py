@@ -11,6 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 # 读取CSV文件
 df = pd.read_csv('input.csv', parse_dates=['timestamp'])
+df.sort_values(by='timestamp', ascending=True, inplace=True)
 
 df = df[df['timestamp'] > '2022-03-01'][:90]
 print(df.head(10))
@@ -21,7 +22,7 @@ data = df.drop(['id', 'timestamp'], axis=1)
 features = data.iloc[:, :].values
 
 # 数据归一化
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler(feature_range=(0, 10))
 features_scaled = scaler.fit_transform(features)
 
 features_tf = np.reshape(features_scaled, (features_scaled.shape[0], 1, features_scaled.shape[1]))
