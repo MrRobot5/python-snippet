@@ -7,6 +7,7 @@ from flask import Flask, request
 from paddleocr import PaddleOCR
 
 import os
+import json
 
 """
 启动一个简单的HTTP服务器并处理 autojs 的POST请求。
@@ -22,7 +23,7 @@ pip install flask
 """
 
 app = Flask(__name__)
-ocr = PaddleOCR(use_angle_cls=True, lang="ch")
+ocr = PaddleOCR(enable_mkldnn=True, use_tensorrt=True, use_angle_cls=True, lang="ch")
 
 
 @app.route('/handle/say', methods=['GET'])
@@ -76,11 +77,10 @@ def handle_ocr():
     # 将PIL图像转换为ndarray
     img_array = np.array(img)
     result = scan(img_array)
-
     # 获取其他的表单数据
     form_data = request.form['key']
 
-    return result
+    return json.dumps(result), 200
 
 
 def scan(img_array):
@@ -94,7 +94,6 @@ def scan(img_array):
                 "bounds": box_to_rect(line[0]),
             })
 
-    print(ocr_res)
     return ocr_res
 
 
@@ -139,4 +138,4 @@ def box_to_rect(box):
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    app.run()
+    app.run(host='192.168.1.40', port=5000)

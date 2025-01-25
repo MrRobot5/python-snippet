@@ -11,7 +11,7 @@ pip install "paddleocr>=2.0.1" -i https://mirror.baidu.com/pypi/simple
 
 # Paddleocr 目前支持的多语言语种可以通过修改lang参数进行切换
 # 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
-ocr = PaddleOCR(use_angle_cls=True, lang="ch")  # need to run only once to download and load model into memory
+ocr = PaddleOCR(enable_mkldnn=True, use_tensorrt=True, use_angle_cls=True, lang="ch")  # need to run only once to download and load model into memory
 img_path = 'Snipaste_2023-11-30_16-20-08.png'
 result = ocr.ocr(img_path, cls=False)
 for idx in range(len(result)):
