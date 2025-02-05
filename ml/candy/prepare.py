@@ -2,7 +2,7 @@
 """
 数据预处理（增加 target 列）
 处理规则： 使用未来3天的close - 当前close, 打标数据盈亏
-源数据： input.csv
+源数据： input.csv (basic/http/loop_fetch.py)
 
 @since 2025年1月2日 17:35:39
 """

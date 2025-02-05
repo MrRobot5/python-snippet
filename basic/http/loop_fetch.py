@@ -13,6 +13,8 @@ from sqlalchemy import create_engine
 import time
 from datetime import datetime, timedelta
 
+#
+symbol = 'SH601088'
 
 headers = {
     'authority': 'stock.xueqiu.com',
@@ -21,7 +23,7 @@ headers = {
     'cache-control': 'no-cache',
     'origin': 'https://xueqiu.com',
     'pragma': 'no-cache',
-    'referer': 'https://xueqiu.com/S/SZ000625',
+    'referer': f'https://xueqiu.com/S/{symbol}',
     'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
@@ -32,15 +34,14 @@ headers = {
 }
 
 session = requests.Session()
-engine = create_engine("sqlite:///database_SH601088.db", pool_recycle=3600, echo=True)
+engine = create_engine(f"sqlite:///database_{symbol}.db", pool_recycle=3600, echo=True)
 
 # 函数用于获取数据并在数据不为空时更新时间戳
 def fetch_data(timestamp):
     # 构建请求URL
-    url = f"https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601088&begin={timestamp}&period=day&type=before&count=-142&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance"
+    url = f"https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={symbol}&begin={timestamp}&period=day&type=before&count=-142&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance"
 
     # 发送GET请求
-    
     response = session.get(url, headers=headers)
 
     # 检查响应状态码
@@ -52,8 +53,12 @@ def fetch_data(timestamp):
         d = response_data["item"]
         data = pd.DataFrame(d, columns=c)
         data['timestamp'] = data['timestamp'].apply(lambda x: time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x / 1000)))
+        # Write records stored in a DataFrame to a SQL database.
         # if_exists{‘fail’, ‘replace’, ‘append’}, default ‘fail’
         data.to_sql("kline_data", con=engine, if_exists="append")
+        # sleep(seconds)
+        time.sleep(1)
+
         # 减去140天
         new_timestamp = next_timestamp(timestamp)
         # 递归调用函数
