@@ -12,7 +12,7 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.models import Sequential
 
 # 为了保证代码的可重复性
@@ -53,8 +53,10 @@ model = Sequential()
 # input_shape=(1, X_train_tf.shape[2])：定义了输入数据的形状。1表示时间序列的长度（即时间步数），X_train_tf.shape[2]表示每个时间步的特征数量。
 # dropout=0.2：这个参数表示在训练过程中，每个时间步的输入将有20%的概率被丢弃。这意味着在每个时间步，输入特征的一部分将被随机设置为零，从而减少模型对特定输入特征的依赖.
 model.add(LSTM(50, return_sequences=True, input_shape=(1, X_train_tf.shape[2]), dropout=0.2))
+model.add(Dropout(rate=0.2))
 # 由于没有指定return_sequences=True，所以这个层只输出最后一个时间步的输出，这通常是用于预测任务的最后一步.
 model.add(LSTM(50, dropout=0.2))
+model.add(Dropout(rate=0.2))
 model.add(Dense(1))
 
 model.compile(optimizer='adam', loss='mean_squared_error')
@@ -80,4 +82,5 @@ y_pred = model.predict(X_test_tf)
 # 计算均方误差 (MSE)
 # 它计算的是模型预测值与实际值之间的均方误差（Mean Squared Error，简称 MSE），是回归问题中常用的损失函数之一。
 mse = mean_squared_error(y_test, y_pred)
+# Mean Squared Error: 0.8883725388249385
 print(f'Mean Squared Error: {mse}')
