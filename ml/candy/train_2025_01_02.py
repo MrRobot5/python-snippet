@@ -35,7 +35,7 @@ target = data.iloc[:, -1].values
 它通过将特征值缩放到一个范围（通常是 [0, 1]）来标准化数据。具体来说，它将每个特征的值线性变换到指定的最小值和最大值之间。
 使用 `MinMaxScaler` 可以有效地将不同范围的特征值缩放到相同的范围，使得机器学习模型更容易处理和训练。
 """
-scaler = MinMaxScaler(feature_range=(0, 10))
+scaler = MinMaxScaler(feature_range=(0, 1))
 features_scaled = scaler.fit_transform(features)
 
 # 将数据划分为训练集和测试集
@@ -62,7 +62,7 @@ model.add(Dense(1))
 model.compile(optimizer='adam', loss='mean_squared_error')
 
 # 训练模型
-model.fit(X_train_tf, y_train, epochs=30, batch_size=7, validation_data=(X_test_tf, y_test))
+model.fit(X_train_tf, y_train, epochs=80, batch_size=8, validation_data=(X_test_tf, y_test))
 
 # 保存模型
 model.save('my_model.h5')  # HDF5文件格式

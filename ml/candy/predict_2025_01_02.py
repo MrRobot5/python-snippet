@@ -22,7 +22,7 @@ data = df.drop(['id', 'timestamp'], axis=1)
 features = data.iloc[:, :].values
 
 # 数据归一化
-scaler = MinMaxScaler(feature_range=(0, 10))
+scaler = MinMaxScaler(feature_range=(0, 1))
 features_scaled = scaler.fit_transform(features)
 
 features_tf = np.reshape(features_scaled, (features_scaled.shape[0], 1, features_scaled.shape[1]))

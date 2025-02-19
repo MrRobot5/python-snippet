@@ -31,7 +31,7 @@ space = {
     'dropout': hp.uniform('dropout', 0.1, 0.5),
     'optimizer': hp.choice('optimizer', ['adam', 'rmsprop']),
     'batch_size': hp.choice('batch_size', [8, 16, 32, 64]),
-    'epochs': hp.choice('epochs', [10, 20, 30])
+    'epochs': hp.choice('epochs', [20, 30, 50, 80])
 }
 
 # 读取CSV文件
@@ -46,12 +46,7 @@ features = data.iloc[:, :-1].values
 target = data.iloc[:, -1].values
 
 # 数据归一化
-"""
-`MinMaxScaler` 是 scikit-learn 库中用于特征缩放的一个类。
-它通过将特征值缩放到一个范围（通常是 [0, 1]）来标准化数据。具体来说，它将每个特征的值线性变换到指定的最小值和最大值之间。
-使用 `MinMaxScaler` 可以有效地将不同范围的特征值缩放到相同的范围，使得机器学习模型更容易处理和训练。
-"""
-scaler = MinMaxScaler(feature_range=(0, 10))
+scaler = MinMaxScaler(feature_range=(0, 1))
 features_scaled = scaler.fit_transform(features)
 
 # 将数据划分为训练集和测试集
@@ -83,7 +78,7 @@ def objective(params):
 
 
 # 运行超参数优化
-# 100%|██████████| 50/50 [04:17<00:00,  5.14s/trial, best loss: 0.8754611611366272]
+# 100%|██████████| 50/50 [09:08<00:00, 10.98s/trial, best loss: 0.8673014044761658]
 trials = Trials()
 best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
 
@@ -96,7 +91,7 @@ best_params = {
     'dropout': best['dropout'],
     'optimizer': ['adam', 'rmsprop'][best['optimizer']],
     'batch_size': [8, 16, 32, 64][best['batch_size']],
-    'epochs': [10, 20, 30][best['epochs']]
+    'epochs': [20, 30, 50, 80][best['epochs']]
 }
-# Best Hyperparameters (actual values): {'units': 200, 'dropout': 0.12877257582142698, 'optimizer': 'rmsprop', 'batch_size': 32, 'epochs': 20}
+# Best Hyperparameters (actual values): {'units': 50, 'dropout': 0.11108671190174817, 'optimizer': 'adam', 'batch_size': 8, 'epochs': 80}
 print("Best Hyperparameters (actual values):", best_params)
