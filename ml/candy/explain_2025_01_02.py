@@ -9,49 +9,14 @@
 """
 import shap
 import numpy as np
-import pandas as pd
+from keras.models import load_model
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.models import Sequential
 
-# 读取CSV文件
-# 假设你的CSV文件名为`data.csv`，前几列是特征，最后一列是目标值。
-original_data = pd.read_csv('train.csv')
-
-data = original_data.drop(['id', 'timestamp'], axis=1)
-
-# 假设最后一列为target，其他列为特征
-# 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
-features = data.iloc[:, :-1].values
-target = data.iloc[:, -1].values
-
-# 数据归一化
-scaler = MinMaxScaler(feature_range=(0, 1))
-features_scaled = scaler.fit_transform(features)
-
-# 将数据划分为训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(features_scaled, target, test_size=0.2, shuffle=False)
-
-# 调整数据形状以适应LSTM输入 (samples, timesteps, features)
-# 这里我们假设每个时间步长为1
-X_train_tf = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
-X_test_tf = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
-
-# 定义LSTM模型
-model = Sequential()
-model.add(LSTM(50, return_sequences=True, input_shape=(1, X_train_tf.shape[2]), dropout=0.111))
-model.add(Dropout(rate=0.111))
-model.add(LSTM(50, dropout=0.111))
-model.add(Dropout(rate=0.111))
-model.add(Dense(1))
-
-model.compile(optimizer='adam', loss='mean_squared_error')
 
 # 训练模型
-model.fit(X_train_tf, y_train, epochs=80, batch_size=8, validation_data=(X_test_tf, y_test))
+# model.fit(X_train_tf, y_train, epochs=80, batch_size=8, validation_data=(X_test_tf, y_test))
 
+model = load_model('my_model.h5')
 
 # 计算 SHAP 值
 # SHAP库本身并不直接支持LSTM模型的解释，因为LSTM模型的内部状态和时间依赖性使得标准的特征重要性计算方法不再适用。
@@ -72,8 +37,9 @@ input_weights = weights[0]  # 输入到遗忘门、输入门、输出门的权�
 feature_importance = np.mean(np.abs(input_weights), axis=1)
 
 # 获取列名数组
-feature_names = data.columns.values  # 转换为 numpy 数组
-print(feature_names)
+# feature_names = data.columns.values  # 转换为 numpy 数组
+# print(feature_names)
+feature_names = ["volume", "open", "high", "low", "close", "turnoverrate"]
 
 # 将特征重要性排序
 sorted_features = np.argsort(feature_importance)[::-1]

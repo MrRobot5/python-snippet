@@ -1,4 +1,3 @@
-
 """
 使用LSTM（长短期记忆网络）来训练CSV数据集。
 步骤包括数据预处理、模型定义、训练和评估。
@@ -20,14 +19,15 @@ np.random.seed(42)
 
 # 读取CSV文件
 # 假设你的CSV文件名为`data.csv`，前几列是特征，最后一列是目标值。
-original_data = pd.read_csv('train.csv')
+df_train = pd.read_csv('train.csv')
 
-data = original_data.drop(['id', 'timestamp'], axis=1)
+selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
 
-# 假设最后一列为target，其他列为特征
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
-features = data.iloc[:, :-1].values
-target = data.iloc[:, -1].values
+df_feature_train = df_train.loc[:, selected_columns].copy().values
+
+# 定义时间步长为 20 天，表示使用过去 20 天的数据来预测下一天的返回值。
+timestep = 10  # use days to predict next 1 day return
 
 # 数据归一化
 """
@@ -36,39 +36,48 @@ target = data.iloc[:, -1].values
 使用 `MinMaxScaler` 可以有效地将不同范围的特征值缩放到相同的范围，使得机器学习模型更容易处理和训练。
 """
 scaler = MinMaxScaler(feature_range=(0, 1))
-features_scaled = scaler.fit_transform(features)
-
-# 将数据划分为训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(features_scaled, target, test_size=0.2, shuffle=False)
+df_feature_train = scaler.fit_transform(df_feature_train)
 
 # 调整数据形状以适应LSTM输入 (samples, timesteps, features)
-# 这里我们假设每个时间步长为1
-X_train_tf = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
-X_test_tf = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
+x_train = []
+y_train = []
+for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timestep" days
+    x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
+    y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
+y_train = scaler.fit_transform(y_train)
+x_train, y_train = np.array(x_train), np.array(y_train)
+
+# 将数据划分为训练集和测试集
+# (x_train, y_train)
+# (x_test, y_test)
+x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, shuffle=False)
 
 # 定义LSTM模型
 # Sequential模型是一个线性堆叠的层的容器，可以方便地按顺序添加层。
 model = Sequential()
+# units=50 number of memory cells, less could be underfitting
 # return_sequences=True：这个参数表示该层的输出应该包含整个序列的输出，而不是只输出最后一个时间步的输出。这对于后续的LSTM层来说是必要的，因为后续的LSTM层需要接收整个序列的信息.
-# input_shape=(1, X_train_tf.shape[2])：定义了输入数据的形状。1表示时间序列的长度（即时间步数），X_train_tf.shape[2]表示每个时间步的特征数量。
-# dropout=0.2：这个参数表示在训练过程中，每个时间步的输入将有20%的概率被丢弃。这意味着在每个时间步，输入特征的一部分将被随机设置为零，从而减少模型对特定输入特征的依赖.
-model.add(LSTM(50, return_sequences=True, input_shape=(1, X_train_tf.shape[2]), dropout=0.2))
-model.add(Dropout(rate=0.2))
+# input_shape=(timestep, X_train_tf.shape[2])：定义了输入数据的形状。timestep 表示时间序列的长度（即时间步数），X_train_tf.shape[2]表示每个时间步的特征数量。
+# dropout=0.145：这个参数表示在训练过程中，每个时间步的输入将有20%的概率被丢弃。这意味着在每个时间步，输入特征的一部分将被随机设置为零，从而减少模型对特定输入特征的依赖.
+model.add(LSTM(50, return_sequences=True, input_shape=(timestep, x_train.shape[2]), dropout=0.145))
+model.add(Dropout(rate=0.145))
+model.add(LSTM(50, dropout=0.145, return_sequences=True))
+model.add(Dropout(rate=0.145))
 # 由于没有指定return_sequences=True，所以这个层只输出最后一个时间步的输出，这通常是用于预测任务的最后一步.
-model.add(LSTM(50, dropout=0.2))
-model.add(Dropout(rate=0.2))
+model.add(LSTM(50, dropout=0.145))
+model.add(Dropout(rate=0.145))
 model.add(Dense(1))
 
 model.compile(optimizer='adam', loss='mean_squared_error')
 
 # 训练模型
-model.fit(X_train_tf, y_train, epochs=80, batch_size=8, validation_data=(X_test_tf, y_test))
+model.fit(x_train, y_train, epochs=80, batch_size=32, validation_data=(x_test, y_test))
 
 # 保存模型
 model.save('my_model.h5')  # HDF5文件格式
 
 # 进行预测
-y_pred = model.predict(X_test_tf)
+y_pred = model.predict(x_test)
 
 # 反归一化数据
 # original_test = scaler.inverse_transform(X_test)
@@ -83,4 +92,5 @@ y_pred = model.predict(X_test_tf)
 # 它计算的是模型预测值与实际值之间的均方误差（Mean Squared Error，简称 MSE），是回归问题中常用的损失函数之一。
 mse = mean_squared_error(y_test, y_pred)
 # Mean Squared Error: 0.8883725388249385
-print(f'Mean Squared Error: {mse}')
+# MSE of prediction for test set is: 2.1925%
+print(f'MSE of prediction for test set is: {round(mse * 100, 4)}%')

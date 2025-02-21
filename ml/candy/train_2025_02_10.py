@@ -1,6 +1,6 @@
 
 """
-使用LSTM（长短期记忆网络）来训练CSV数据集。
+使用hyperopt 优化 LSTM模型超参数。
 
 feature:
 1. 堆叠多个LSTM层可以增加模型的深度，使其能够学习到更复杂的特征和模式
@@ -25,42 +25,47 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.models import Sequential
 
-
 space = {
-    'units': hp.choice('units', [30, 50, 70, 90, 120, 150, 200]),
+    'units': hp.choice('units', [30, 50, 90, 120, 150, 200]),
     'dropout': hp.uniform('dropout', 0.1, 0.5),
     'optimizer': hp.choice('optimizer', ['adam', 'rmsprop']),
     'batch_size': hp.choice('batch_size', [8, 16, 32, 64]),
-    'epochs': hp.choice('epochs', [20, 30, 50, 80])
+    'epochs': hp.choice('epochs', [30, 50, 80, 100])
 }
 
 # 读取CSV文件
-# 假设你的CSV文件名为`data.csv`，前几列是特征，最后一列是目标值。
-original_data = pd.read_csv('train.csv')
+df_train = pd.read_csv('train.csv')
 
-data = original_data.drop(['id', 'timestamp'], axis=1)
+selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
 
-# 假设最后一列为target，其他列为特征
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
-features = data.iloc[:, :-1].values
-target = data.iloc[:, -1].values
+df_feature_train = df_train.loc[:, selected_columns].copy().values
 
-# 数据归一化
+timestep = 10  # use days to predict next 1 day return
+
 scaler = MinMaxScaler(feature_range=(0, 1))
-features_scaled = scaler.fit_transform(features)
-
-# 将数据划分为训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(features_scaled, target, test_size=0.2, shuffle=False)
+df_feature_train = scaler.fit_transform(df_feature_train)
 
 # 调整数据形状以适应LSTM输入 (samples, timesteps, features)
-# 这里我们假设每个时间步长为1
-X_train_tf = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
-X_test_tf = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
+x_train = []
+y_train = []
+for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timestep" days
+    x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
+    y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
+y_train = scaler.fit_transform(y_train)
+x_train, y_train = np.array(x_train), np.array(y_train)
+
+# 将数据划分为训练集和测试集
+# (x_train, y_train)
+# (x_test, y_test)
+x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, shuffle=False)
 
 # 定义 LSTM 模型
 def create_model(params):
     model = Sequential()
-    model.add(LSTM(params['units'], return_sequences=True, input_shape=(1, X_train_tf.shape[2]), dropout=params['dropout']))
+    model.add(LSTM(params['units'], return_sequences=True, input_shape=(timestep, x_train.shape[2]), dropout=params['dropout']))
+    model.add(Dropout(rate=params['dropout']))
+    model.add(LSTM(params['units'], dropout=params['dropout'],return_sequences=True))
     model.add(Dropout(rate=params['dropout']))
     model.add(LSTM(params['units'], dropout=params['dropout']))
     model.add(Dropout(rate=params['dropout']))
@@ -72,13 +77,14 @@ def create_model(params):
 def objective(params):
     model = create_model(params)
     # model.fit(X_train_tf, y_train, epochs=30, batch_size=7, validation_data=(X_test_tf, y_test))
-    model.fit(X_train_tf, y_train, epochs=params['epochs'], batch_size=params['batch_size'], verbose=0)
-    loss = model.evaluate(X_test_tf, y_test, verbose=0)
+    model.fit(x_train, y_train, epochs=params['epochs'], batch_size=params['batch_size'], verbose=0)
+    loss = model.evaluate(x_test, y_test, verbose=0)
     return {'loss': loss, 'status': STATUS_OK}
 
 
 # 运行超参数优化
 # 100%|██████████| 50/50 [09:08<00:00, 10.98s/trial, best loss: 0.8673014044761658]
+# 100%|██████████| 50/50 [28:25<00:00, 34.11s/trial, best loss: 0.020789314061403275] scale return
 trials = Trials()
 best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
 
@@ -87,11 +93,11 @@ print("Best Hyperparameters:", best)
 
 # 将索引转换为实际值
 best_params = {
-    'units': [30, 50, 70, 90, 120, 150, 200][best['units']],
+    'units': [30, 50, 90, 120, 150, 200][best['units']],
     'dropout': best['dropout'],
     'optimizer': ['adam', 'rmsprop'][best['optimizer']],
     'batch_size': [8, 16, 32, 64][best['batch_size']],
-    'epochs': [20, 30, 50, 80][best['epochs']]
+    'epochs': [30, 50, 80, 100][best['epochs']]
 }
 # Best Hyperparameters (actual values): {'units': 50, 'dropout': 0.11108671190174817, 'optimizer': 'adam', 'batch_size': 8, 'epochs': 80}
 print("Best Hyperparameters (actual values):", best_params)
