@@ -15,10 +15,12 @@ output_filename = 'predict.csv'
 df_test = pd.read_csv('input.csv', parse_dates=['timestamp'])
 df_test.sort_values(by='timestamp', ascending=True, inplace=True)
 
-df_test = df_test[df_test['timestamp'] > '2020-03-01'][:90]
+# 选取与 train.csv 无交集的数据
+df_test = df_test[df_test['timestamp'] > '2022-01-01'][:90]
 print(df_test.head(10))
 
 selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
+# selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
 
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
 df_feature_test = df_test.loc[:, selected_columns].copy().values

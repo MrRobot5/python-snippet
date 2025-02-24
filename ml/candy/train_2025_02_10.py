@@ -29,6 +29,7 @@ space = {
     'units': hp.choice('units', [30, 50, 90, 120, 150, 200]),
     'dropout': hp.uniform('dropout', 0.1, 0.5),
     'optimizer': hp.choice('optimizer', ['adam', 'rmsprop']),
+    'loss': hp.choice('loss', ['mean_absolute_error', 'mean_squared_error', 'mean_squared_logarithmic_error']),
     'batch_size': hp.choice('batch_size', [8, 16, 32, 64]),
     'epochs': hp.choice('epochs', [30, 50, 80, 100])
 }
@@ -37,6 +38,7 @@ space = {
 df_train = pd.read_csv('train.csv')
 
 selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
+# selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
 
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
 df_feature_train = df_train.loc[:, selected_columns].copy().values
@@ -70,7 +72,7 @@ def create_model(params):
     model.add(LSTM(params['units'], dropout=params['dropout']))
     model.add(Dropout(rate=params['dropout']))
     model.add(Dense(1))
-    model.compile(optimizer=params['optimizer'], loss='mean_squared_error')
+    model.compile(optimizer=params['optimizer'], loss=params['loss'])
     return model
 
 # 定义目标函数
@@ -85,8 +87,9 @@ def objective(params):
 # 运行超参数优化
 # 100%|██████████| 50/50 [09:08<00:00, 10.98s/trial, best loss: 0.8673014044761658]
 # 100%|██████████| 50/50 [28:25<00:00, 34.11s/trial, best loss: 0.020789314061403275] scale return
+# 100%|██████████| 100/100 [48:25<00:00, 29.06s/trial, best loss: 0.014476322568953037] loss function
 trials = Trials()
-best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
+best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
 
 # 输出最优超参数
 print("Best Hyperparameters:", best)
@@ -96,8 +99,10 @@ best_params = {
     'units': [30, 50, 90, 120, 150, 200][best['units']],
     'dropout': best['dropout'],
     'optimizer': ['adam', 'rmsprop'][best['optimizer']],
+    'loss': ['mean_absolute_error', 'mean_squared_error', 'mean_squared_logarithmic_error'][best['loss']],
     'batch_size': [8, 16, 32, 64][best['batch_size']],
     'epochs': [30, 50, 80, 100][best['epochs']]
 }
 # Best Hyperparameters (actual values): {'units': 50, 'dropout': 0.11108671190174817, 'optimizer': 'adam', 'batch_size': 8, 'epochs': 80}
+# Best Hyperparameters (actual values): {'units': 30, 'dropout': 0.20213520711415833, 'optimizer': 'rmsprop', 'loss': 'mean_squared_logarithmic_error', 'batch_size': 32, 'epochs': 30}
 print("Best Hyperparameters (actual values):", best_params)

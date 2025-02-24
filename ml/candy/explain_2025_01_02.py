@@ -40,6 +40,7 @@ feature_importance = np.mean(np.abs(input_weights), axis=1)
 # feature_names = data.columns.values  # 转换为 numpy 数组
 # print(feature_names)
 feature_names = ["volume", "open", "high", "low", "close", "turnoverrate"]
+# feature_names = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
 
 # 将特征重要性排序
 sorted_features = np.argsort(feature_importance)[::-1]
