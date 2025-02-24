@@ -16,7 +16,8 @@ import pandas as pd
 input_filename = 'input.csv'
 output_filename = 'train.csv'
 
-look_back = 3
+# PnL 验证天数（使用5天来训练2019-01-02 00:00:00 ~ 2021-01-20 00:00:00， 预测2022-01 的数据，效果很好）
+look_back = 5
 
 # 使用pandas读取CSV文件
 df = pd.read_csv(input_filename, parse_dates=['timestamp'])
@@ -30,8 +31,11 @@ print(column_names_list)
 df.sort_values(by='timestamp', ascending=True, inplace=True)
 
 # 过滤timestamp大于'2022-01-01'的数据
-df = df[df['timestamp'] > '2022-01-01']
+df = df[df['timestamp'] > '2019-01-01'][:500]
 print(df.head(10))
+min_ts = df['timestamp'].min()
+max_ts = df['timestamp'].max()
+print(f"时间戳范围: {min_ts} ~ {max_ts}")
 
 # 使用shift方法直接计算差值，避免循环
 # for i in range(0, df.shape[0] - look_back):  # disgard the last "look_back" days
