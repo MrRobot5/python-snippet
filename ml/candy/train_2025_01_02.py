@@ -8,6 +8,7 @@
 
 import numpy as np
 import pandas as pd
+import joblib
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
@@ -45,7 +46,8 @@ y_train = []
 for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timestep" days
     x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
     y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
-y_train = scaler.fit_transform(y_train)
+# 暂时使用 scaler 处理return, 负数结果train loss 难以评估
+y_train = MinMaxScaler(feature_range=(0, 1)).fit_transform(y_train)
 x_train, y_train = np.array(x_train), np.array(y_train)
 
 # 将数据划分为训练集和测试集
@@ -78,6 +80,7 @@ model.fit(x_train, y_train, epochs=hp['epochs'], batch_size=hp['batch_size'])
 
 # 保存模型
 model.save('my_model.h5')  # HDF5文件格式
+joblib.dump(scaler, 'minmax_scaler.pkl')
 
 # 进行预测
 y_pred = model.predict(x_test)

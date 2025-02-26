@@ -6,6 +6,7 @@
 """
 import numpy as np
 import pandas as pd
+import joblib
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 
@@ -16,7 +17,7 @@ df_test = pd.read_csv('input.csv', parse_dates=['timestamp'])
 df_test.sort_values(by='timestamp', ascending=True, inplace=True)
 
 # 选取与 train.csv 无交集的数据
-df_test = df_test[df_test['timestamp'] > '2022-01-01'][:90]
+df_test = df_test[df_test['timestamp'] > '2022-01-01'][:85]
 print(df_test.head(10))
 
 selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
@@ -28,8 +29,10 @@ df_feature_test = df_test.loc[:, selected_columns].copy().values
 timestep = 10 # use days to predict next 1 day return
 
 # 数据归一化
-scaler = MinMaxScaler(feature_range=(0, 1))
-df_feature_test = scaler.fit_transform(df_feature_test)
+# fix: 使用trian 归一化fit， 保持transform 结果一致 2025年2月26日 10:37:39
+# scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = joblib.load('minmax_scaler.pkl')
+df_feature_test = scaler.transform(df_feature_test)
 
 x_test = []
 for i in range(timestep, df_feature_test.shape[0]):  # discard the last "timestep" days

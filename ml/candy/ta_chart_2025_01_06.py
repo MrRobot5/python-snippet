@@ -53,15 +53,16 @@ ax.set_xticks(data.index)
 ax.set_xticklabels(data.index, rotation=90)
 
 # 标注调用量大于3000的节点
+point = 0.3677
 for i, row in data.iterrows():
     # return_scaled, 分界线暂定 0.36。通过拨动分界点，调整S_n_B 的timing (待验证)
-    if row['pred'] > 0.36:
+    if row['pred'] > point:
         # f'{row["pred"]}: {row["pred"]}',
         ax.annotate('b',
                     xy=(i, row['close']),
                     xytext=(i, row['close']),
                     arrowprops=dict(facecolor='black', shrink=0.05))
-    if row['pred'] < 0.36:
+    if row['pred'] < point:
         # f'{row["pred"]}: {row["pred"]}',
         ax.annotate('s',
                     xy=(i, row['close']),
