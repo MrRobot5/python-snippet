@@ -3,6 +3,11 @@
 步骤包括数据预处理、模型定义、训练和评估。
 源数据： train.csv
 
+@todo:
+1. 初始化两个独立的 scaler 对象， scaler_x  scaler_y
+2. 保存 Scaler 参数：标准化后，需保存 scaler_x 和 scaler_y，以便后续对测试集 x_test 和 y_test 使用相同参数进行标准化。
+3. 参考qlib 记录优化的实验结果
+
 @since 2025年1月2日 17:30:41
 """
 
@@ -94,6 +99,12 @@ y_pred = model.predict(x_test)
 # 计算均方误差 (MSE)
 # 它计算的是模型预测值与实际值之间的均方误差（Mean Squared Error，简称 MSE），是回归问题中常用的损失函数之一。
 mse = mean_squared_error(y_test, y_pred)
+
+# 测试预测的结果导出，方便单独分析
+result_df = pd.DataFrame(y_test, columns=["y_test"])
+result_df["y_pred"] = y_pred
+result_df.to_csv('test_predict.csv', index=False)
+
 # Mean Squared Error: 0.8883725388249385
 # MSE of prediction for test set is: 2.1925%
 print(f'MSE of prediction for test set is: {round(mse * 100, 4)}%')
