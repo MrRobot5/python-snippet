@@ -5,6 +5,8 @@
 1. 使用激活函数输出固定的类别/概率，帮助模型评估准确率（目标更明确，评估准确率更高）
 2. 优化器、损失函数和评估指标适配修改
 
+tensorboard==2.15.1
+
 源数据： train.csv
 
 @since 2025年1月2日 17:30:41
@@ -26,20 +28,28 @@ np.random.seed(42)
 
 # 读取CSV文件
 # 假设你的CSV文件名为`data.csv`，前几列是特征，最后一列是目标值。
-df_train = pd.read_csv('train.csv')
+df_data = pd.read_csv('train.csv')
+
+# 将数据划分为训练集和测试集
+# Tips: 始终先将数据分成训练和测试子集，特别是在任何预处理步骤之前。https://scikit-learn.org/stable/common_pitfalls.html
+# 防止 df_test 污染 scaler.fit(df_train)
+df_train, df_test = train_test_split(df_data, test_size=0.2, shuffle=False)
 
 selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
 # selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
 
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
 df_feature_train = df_train.loc[:, selected_columns].copy().values
+df_feature_test = df_test.loc[:, selected_columns].copy().values
 
 # 定义时间步长为 20 天，表示使用过去 20 天的数据来预测下一天的返回值。
 timestep = 10  # use days to predict next 1 day return
 
 # 数据归一化
-scaler = MinMaxScaler(feature_range=(0, 1))
-df_feature_train = scaler.fit_transform(df_feature_train)
+x_scaler = MinMaxScaler(feature_range=(0, 1))
+y_scaler = MaxAbsScaler()
+df_feature_train = x_scaler.fit_transform(df_feature_train)
+df_feature_test = x_scaler.transform(df_feature_test)
 
 # 调整数据形状以适应LSTM输入 (samples, timesteps, features)
 x_train = []
@@ -48,13 +58,17 @@ for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timest
     x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
     y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
 # 暂时使用 scaler 处理return, 负数结果train loss 难以评估
-y_train = MaxAbsScaler().fit_transform(y_train)
+y_train = y_scaler.fit_transform(y_train)
 x_train, y_train = np.array(x_train), np.array(y_train)
 
-# 将数据划分为训练集和测试集
-# (x_train, y_train)
-# (x_test, y_test)
-x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, shuffle=False)
+x_test = []
+y_test = []
+for i in range(timestep, df_feature_test.shape[0]):  # discard the last "timestep" days
+    x_test.append(df_feature_test[i - timestep:i])  # rolling_timestep * features
+    y_test.append(df_train[['return']].iloc[i].values)
+y_test = y_scaler.transform(y_test)
+x_test, y_test = np.array(x_test), np.array(y_test)
+
 
 # 指定日志目录（每次训练需新建目录）
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -76,7 +90,7 @@ checkpoint_callback = ModelCheckpoint('best_model.keras', save_best_only=True)
 # Sequential模型是一个线性堆叠的层的容器，可以方便地按顺序添加层。
 model = Sequential()
 # Best Hyperparameters
-hp = {'units': 200, 'dropout': 0.23343468267313267, 'optimizer': 'rmsprop', 'batch_size': 8, 'epochs': 50}
+hp = {'units': 120, 'dropout': 0.4257423014049223, 'optimizer': 'rmsprop', 'batch_size': 64, 'epochs': 50}
 # units=50 number of memory cells, less could be underfitting
 model.add(LSTM(hp['units'], return_sequences=True, input_shape=(timestep, x_train.shape[2]), dropout=hp['dropout']))
 model.add(Dropout(rate=hp['dropout']))
@@ -100,7 +114,8 @@ model.fit(x_train, y_train, epochs=hp['epochs'], batch_size=hp['batch_size'], va
 
 # 保存模型
 model.save('my_model.keras')
-joblib.dump(scaler, 'minmax_scaler.pkl')
+joblib.dump(x_scaler, 'x_scaler.pkl')
+joblib.dump(y_scaler, 'y_scaler.pkl')
 
 # 进行预测
 y_pred = model.predict(x_test)
