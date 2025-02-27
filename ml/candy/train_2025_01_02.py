@@ -20,13 +20,19 @@ np.random.seed(42)
 
 # 读取CSV文件
 # 假设你的CSV文件名为`data.csv`，前几列是特征，最后一列是目标值。
-df_train = pd.read_csv('train.csv')
+df_data = pd.read_csv('train.csv')
+
+# 将数据划分为训练集和测试集
+# Tips: 始终先将数据分成训练和测试子集，特别是在任何预处理步骤之前。https://scikit-learn.org/stable/common_pitfalls.html
+# 防止 df_test 污染 scaler.fit(df_train)
+df_train, df_test = train_test_split(df_data, test_size=0.2, shuffle=False)
 
 selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
 # selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
 
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
 df_feature_train = df_train.loc[:, selected_columns].copy().values
+df_feature_test = df_test.loc[:, selected_columns].copy().values
 
 # 定义时间步长为 20 天，表示使用过去 20 天的数据来预测下一天的返回值。
 timestep = 10  # use days to predict next 1 day return
@@ -37,8 +43,10 @@ timestep = 10  # use days to predict next 1 day return
 它通过将特征值缩放到一个范围（通常是 [0, 1]）来标准化数据。具体来说，它将每个特征的值线性变换到指定的最小值和最大值之间。
 使用 `MinMaxScaler` 可以有效地将不同范围的特征值缩放到相同的范围，使得机器学习模型更容易处理和训练。
 """
-scaler = MinMaxScaler(feature_range=(0, 1))
-df_feature_train = scaler.fit_transform(df_feature_train)
+x_scaler = MinMaxScaler(feature_range=(0, 1))
+y_scaler = MinMaxScaler(feature_range=(0, 1))
+df_feature_train = x_scaler.fit_transform(df_feature_train)
+df_feature_test = x_scaler.transform(df_feature_test)
 
 # 调整数据形状以适应LSTM输入 (samples, timesteps, features)
 x_train = []
@@ -47,13 +55,16 @@ for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timest
     x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
     y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
 # 暂时使用 scaler 处理return, 负数结果train loss 难以评估
-y_train = MinMaxScaler(feature_range=(0, 1)).fit_transform(y_train)
+y_train = y_scaler.fit_transform(y_train)
 x_train, y_train = np.array(x_train), np.array(y_train)
 
-# 将数据划分为训练集和测试集
-# (x_train, y_train)
-# (x_test, y_test)
-x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, shuffle=False)
+x_test = []
+y_test = []
+for i in range(timestep, df_feature_test.shape[0]):  # discard the last "timestep" days
+    x_test.append(df_feature_test[i - timestep:i])  # rolling_timestep * features
+    y_test.append(df_train[['return']].iloc[i].values)
+y_test = y_scaler.transform(y_test)
+x_test, y_test = np.array(x_test), np.array(y_test)
 
 # 定义LSTM模型
 # Sequential模型是一个线性堆叠的层的容器，可以方便地按顺序添加层。
@@ -79,8 +90,9 @@ model.compile(optimizer=hp['optimizer'], loss='mean_squared_error')
 model.fit(x_train, y_train, epochs=hp['epochs'], batch_size=hp['batch_size'])
 
 # 保存模型
-model.save('my_model.h5')  # HDF5文件格式
-joblib.dump(scaler, 'minmax_scaler.pkl')
+model.save('my_model.keras')  # HDF5文件格式
+joblib.dump(x_scaler, 'x_scaler.pkl')
+joblib.dump(y_scaler, 'y_scaler.pkl')
 
 # 进行预测
 y_pred = model.predict(x_test)
