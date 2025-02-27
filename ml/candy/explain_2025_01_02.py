@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 # 训练模型
 # model.fit(X_train_tf, y_train, epochs=80, batch_size=8, validation_data=(X_test_tf, y_test))
 
-model = load_model('my_model.h5')
+# model = load_model('best_model.keras')
+model = load_model('my_model.keras')
 
 # 计算 SHAP 值
 # SHAP库本身并不直接支持LSTM模型的解释，因为LSTM模型的内部状态和时间依赖性使得标准的特征重要性计算方法不再适用。

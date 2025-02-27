@@ -41,7 +41,7 @@ for i in range(timestep, df_feature_test.shape[0]):  # discard the last "timeste
 x_test = np.array(x_test) # days * timestep * features
 
 # 加载模型
-loaded_model = load_model('my_model.h5')
+loaded_model = load_model('my_model.keras')
 
 # 进行预测
 # 使用加载的模型进行预测或评估
