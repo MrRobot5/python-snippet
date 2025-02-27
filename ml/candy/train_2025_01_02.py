@@ -59,7 +59,7 @@ x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=
 # Sequential模型是一个线性堆叠的层的容器，可以方便地按顺序添加层。
 model = Sequential()
 # Best Hyperparameters
-hp = {'units': 30, 'dropout': 0.20213520711415833, 'optimizer': 'rmsprop', 'loss': 'mean_squared_logarithmic_error', 'batch_size': 32, 'epochs': 30}
+hp = {'units': 120, 'dropout': 0.4257423014049223, 'optimizer': 'rmsprop', 'batch_size': 64, 'epochs': 50}
 # units=50 number of memory cells, less could be underfitting
 # return_sequences=True：这个参数表示该层的输出应该包含整个序列的输出，而不是只输出最后一个时间步的输出。这对于后续的LSTM层来说是必要的，因为后续的LSTM层需要接收整个序列的信息.
 # input_shape=(timestep, X_train_tf.shape[2])：定义了输入数据的形状。timestep 表示时间序列的长度（即时间步数），X_train_tf.shape[2]表示每个时间步的特征数量。
@@ -73,7 +73,7 @@ model.add(LSTM(hp['units'], dropout=hp['dropout']))
 model.add(Dropout(rate=hp['dropout']))
 model.add(Dense(1))
 
-model.compile(optimizer=hp['optimizer'], loss=hp['loss'])
+model.compile(optimizer=hp['optimizer'], loss='mean_squared_error')
 
 # 训练模型
 model.fit(x_train, y_train, epochs=hp['epochs'], batch_size=hp['batch_size'])
@@ -87,12 +87,6 @@ y_pred = model.predict(x_test)
 
 # 反归一化数据
 # original_test = scaler.inverse_transform(X_test)
-
-# 导出数据和预测结果到 csv
-# 将数组转换回DataFrame: 使用pd.DataFrame()构造函数将数组转换回DataFrame
-# original_test = pd.DataFrame(X_test, columns=data.columns[:-1])
-# original_test["pred"] = y_pred
-# original_test.to_csv('output_pred.csv', index=False)
 
 # 计算均方误差 (MSE)
 # 它计算的是模型预测值与实际值之间的均方误差（Mean Squared Error，简称 MSE），是回归问题中常用的损失函数之一。
