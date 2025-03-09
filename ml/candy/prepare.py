@@ -37,10 +37,12 @@ min_ts = df['timestamp'].min()
 max_ts = df['timestamp'].max()
 print(f"时间戳范围: {min_ts} ~ {max_ts}")
 
+# 计算的是未来 look_back 行的值与当前行值的差，即未来价格与当前价格的差额。
+# 上述差额除以当前行的值，计算的是收益率（或变化率）。@since 2025年3月9日， 使用百分比替换绝对值，防止未来几年由于价格上涨，导致用之前的结果误判涨幅。
 # 使用shift方法直接计算差值，避免循环
 # for i in range(0, df.shape[0] - look_back):  # disgard the last "look_back" days
 #     result.append(df.iloc[i + look_back]['close'] - df.iloc[i]['close'])
-df['return'] = df['close'].shift(-look_back) - df['close']
+df['return'] = (df['close'].shift(-look_back) - df['close']) / df['close']
 
 # 删除最后look_back行的NaN值（因为shift操作会引入NaN）
 df = df.dropna(subset=['return'])
