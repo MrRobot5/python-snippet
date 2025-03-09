@@ -39,6 +39,8 @@ df_train = pd.read_csv('train.csv')
 selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
 # selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
 
+# todo split data, then scaler
+
 # 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
 df_feature_train = df_train.loc[:, selected_columns].copy().values
 
@@ -46,6 +48,7 @@ timestep = 10  # use days to predict next 1 day return
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 df_feature_train = scaler.fit_transform(df_feature_train)
+# todo need y_scaler
 
 # 调整数据形状以适应LSTM输入 (samples, timesteps, features)
 x_train = []
@@ -64,7 +67,7 @@ x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=
 # 定义 LSTM 模型
 def create_model(params):
     model = Sequential()
-    model.add(LSTM(params['units'], return_sequences=True, input_shape=(timestep, x_train.shape[2]), dropout=params['dropout']))
+    model.add(LSTM(params['units'], input_shape=(timestep, x_train.shape[2]), dropout=params['dropout'], return_sequences=True))
     model.add(Dropout(rate=params['dropout']))
     model.add(LSTM(params['units'], dropout=params['dropout'],return_sequences=True))
     model.add(Dropout(rate=params['dropout']))
