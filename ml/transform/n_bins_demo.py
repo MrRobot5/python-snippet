@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import KBinsDiscretizer
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 
 # 给定的一维数据
 # data = np.array([-0.1867, 0.3224, 0.4072, 0.2715, 0.3478, -0.1527, -0.3733, 0.1272, 0.8398, 1.264, 0.5684, 0.5175, -0.4072, -0.7126, -0.5429])
@@ -32,34 +33,78 @@ discretizer = KBinsDiscretizer(n_bins=10, encode='ordinal', strategy='quantile')
 # discretized_data = discretizer.fit_transform(data.reshape(-1, 1))
 df['fault_encoded'] = discretizer.fit_transform(df[['return']])
 # discretized_data = discretizer.fit_transform(df[['return']])
-# desc_result(discretized_data)
+# analyze_discretized_data(discretized_data)
 
 # 查看结果
 print(df.head())
 
-df = df[:100]
-
-# todo chart
-
-# 提取 original 和 scaled 列
-y_test = df['return'] # 假设列名为 'original'
-y_pred = df['fault_encoded'] * 0.1  # 假设列名为 'scaled'
-
-# 绘制折线图
-plt.plot(y_test, label='y_test', marker='o')  # 添加标记以便更清晰[^2^]
-plt.plot(y_pred, label='y_pred', marker='x')     # 添加标记以便更清晰[^2^]
-
-# 添加标题和标签
-plt.title('Original vs Scaled Values')
-plt.xlabel('Index')
-plt.ylabel('Value')
-plt.legend()  # 添加图例[^3^]
-
-# 显示图表
-plt.show()
+df = df[:500]
 
 
-def desc_result(discretized_data):
+def visualize_data_comparison(df):
+    """
+    可视化比较原始数据和离散化后的数据
+    参数:
+        df (DataFrame): 包含原始数据和离散化数据的数据框
+    """
+    # 数据准备
+    original_values = df['return']
+    discretized_values = df['fault_encoded'] * 0.1  # 保持量级一致
+
+    # 创建画布和坐标系
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.subplots_adjust(left=0.1, bottom=0.25)  # 为滑动条预留空间
+
+    # 绘制数据线
+    # 设置统一线宽和透明度参数 (linewidth=1.5, alpha=0.7)
+    line_original, = ax.plot(original_values, label='Original Data', marker='o', alpha=0.7, linewidth=1.5)
+    line_discretized, = ax.plot(discretized_values, label='Discretized Data', marker='x', alpha=0.7, linewidth=1.5)
+
+    # 设置图表样式
+    ax.set_title('Comparison of Original and Discretized Values', fontsize=14)
+    ax.set_xlabel('Index', fontsize=12)
+    ax.set_ylabel('Value', fontsize=12)
+    # 增加网格线 (ax.grid()) 提高可读性
+    ax.grid(True, linestyle='--', alpha=0.6)
+    ax.legend(loc='upper left')
+
+    # 创建滑动条
+    slider_ax = plt.axes([0.1, 0.1, 0.8, 0.03])  # [left, bottom, width, height]
+    slider = Slider(
+        slider_ax,
+        'Offset',
+        0.0,
+        len(original_values) - 100,  # 最大偏移量
+        valinit=0,
+        valstep=1
+    )
+
+    # 更新函数
+    def update(val):
+        start = int(val)
+        end = start + 100
+        # 动态调整x轴范围
+        ax.set_xlim(start, end)
+        # 更新标题显示当前范围
+        ax.set_title(f'Comparison ({start}-{end})', fontsize=14)
+        # 重绘图形
+        fig.canvas.draw_idle()
+
+    # 绑定事件
+    slider.on_changed(update)
+
+    # 强制初始化显示0-100范围
+    ax.set_xlim(0, 100)
+
+    # 显示图形
+    plt.show()
+
+
+# 绘制图表
+visualize_data_comparison(df)
+
+
+def analyze_discretized_data(discretized_data):
     # 将离散化后的结果转换回一维数组
     discretized_data = discretized_data.flatten()
 

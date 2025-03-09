@@ -14,7 +14,8 @@ engine = create_engine("sqlite:///database_SZ000625.db", pool_recycle=3600, echo
 # 查询特定列的数据
 query = "SELECT * FROM kline_data order by timestamp asc;"  # 假设表名为 kline_data
 data = pd.read_sql(query, con=engine)
-
+# 数据去重
+data = data.drop_duplicates(subset=['timestamp'], keep='first', inplace=True)
 # 将数据保存为 CSV 文件
 data.to_csv("kline_data.csv", index=False)  # index=False 表示不保存索引列
 
