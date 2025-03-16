@@ -10,7 +10,7 @@
 
 @since 2025年1月2日 17:30:41
 """
-
+from utils import prepare_dataset
 import numpy as np
 import pandas as pd
 import joblib
@@ -32,15 +32,11 @@ df_data = pd.read_csv('train.csv')
 # 防止 df_test 污染 scaler.fit(df_train)
 df_train, df_test = train_test_split(df_data, test_size=0.2, shuffle=False)
 
-selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
+# use days to predict next 1 day return
+TIMESTEPS = 10
+SELECTED_FEATURES = ["volume", "open", "high", "low", "close", "turnoverrate"]
 # selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
-
-# 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
-df_feature_train = df_train.loc[:, selected_columns].copy().values
-df_feature_test = df_test.loc[:, selected_columns].copy().values
-
-# 定义时间步长为 20 天，表示使用过去 20 天的数据来预测下一天的返回值。
-timestep = 10  # use days to predict next 1 day return
+TARGET_COLUMN = 'return'
 
 # 数据归一化
 """
@@ -50,26 +46,28 @@ timestep = 10  # use days to predict next 1 day return
 """
 x_scaler = MinMaxScaler(feature_range=(0, 1))
 y_scaler = MinMaxScaler(feature_range=(0, 1))
-df_feature_train = x_scaler.fit_transform(df_feature_train)
-df_feature_test = x_scaler.transform(df_feature_test)
 
-# 调整数据形状以适应LSTM输入 (samples, timesteps, features)
-x_train = []
-y_train = []
-for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timestep" days
-    x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
-    y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
-# 暂时使用 scaler 处理return, 负数结果train loss 难以评估
-y_train = y_scaler.fit_transform(y_train)
-x_train, y_train = np.array(x_train), np.array(y_train)
+# 处理训练集
+x_train, y_train = prepare_dataset(
+    df=df_train,
+    selected_features=SELECTED_FEATURES,
+    target_column=TARGET_COLUMN,
+    timesteps=TIMESTEPS,
+    x_scaler=x_scaler,
+    y_scaler=y_scaler,
+    fit=True
+)
 
-x_test = []
-y_test = []
-for i in range(timestep, df_feature_test.shape[0]):  # discard the last "timestep" days
-    x_test.append(df_feature_test[i - timestep:i])  # rolling_timestep * features
-    y_test.append(df_train[['return']].iloc[i].values)
-y_test = y_scaler.transform(y_test)
-x_test, y_test = np.array(x_test), np.array(y_test)
+# 处理测试集
+x_test, y_test = prepare_dataset(
+    df=df_test,
+    selected_features=SELECTED_FEATURES,
+    target_column=TARGET_COLUMN,
+    timesteps=TIMESTEPS,
+    x_scaler=x_scaler,
+    y_scaler=y_scaler,
+    fit=False
+)
 
 # 定义LSTM模型
 # Sequential模型是一个线性堆叠的层的容器，可以方便地按顺序添加层。
@@ -80,7 +78,7 @@ hp = {'units': 120, 'dropout': 0.4257423014049223, 'optimizer': 'rmsprop', 'batc
 # return_sequences=True：这个参数表示该层的输出应该包含整个序列的输出，而不是只输出最后一个时间步的输出。这对于后续的LSTM层来说是必要的，因为后续的LSTM层需要接收整个序列的信息.
 # input_shape=(timestep, X_train_tf.shape[2])：定义了输入数据的形状。timestep 表示时间序列的长度（即时间步数），X_train_tf.shape[2]表示每个时间步的特征数量。
 # dropout=0.2：这个参数表示在训练过程中，每个时间步的输入将有20%的概率被丢弃。这意味着在每个时间步，输入特征的一部分将被随机设置为零，从而减少模型对特定输入特征的依赖.
-model.add(LSTM(hp['units'], return_sequences=True, input_shape=(timestep, x_train.shape[2]), dropout=hp['dropout']))
+model.add(LSTM(hp['units'], return_sequences=True, input_shape=(TIMESTEPS, x_train.shape[2]), dropout=hp['dropout']))
 model.add(Dropout(rate=hp['dropout']))
 model.add(LSTM(hp['units'], dropout=hp['dropout'], return_sequences=True))
 model.add(Dropout(rate=hp['dropout']))

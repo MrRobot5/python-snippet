@@ -6,7 +6,7 @@ pip install hyperopt
 @since 2025年3月7日 13:22:00
 @see train_2025_01_08.py 参考模型
 """
-from hyperopt import hp
+from utils import prepare_dataset
 from hyperopt import fmin, tpe, hp, Trials, STATUS_OK
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 space = {
     'num_layers': hp.choice('num_layers', [1, 2, 3, 4, 5]),  # 层数选择
     'dropout': hp.uniform('dropout', 0.1, 0.5),
-    'units': hp.quniform('units', 16, 256, 16),     # 神经元数量，整数均匀分布（步长为16）
+    'units': hp.quniform('units', 16, 512, 16),     # 神经元数量，整数均匀分布（步长为16）
     'activation': hp.choice('activation', ['tanh', 'relu']),  # 激活函数
     'learning_rate': hp.loguniform('learning_rate', -5, -2),  # 学习率范围, 对数均匀分布（用于学习率等浮点参数）
     'epochs': hp.choice('epochs', [20, 30, 40, 50, 60]),        # 训练轮数
@@ -32,44 +32,51 @@ space = {
 }
 
 # 读取CSV文件
-df_train = pd.read_csv('train.csv')
+df_data = pd.read_csv('train.csv')
 
-selected_columns = ["volume", "open", "high", "low", "close", "turnoverrate"]
+# use days to predict next 1 day return
+TIMESTEPS = 10
+SELECTED_FEATURES = ["volume", "open", "high", "low", "close", "turnoverrate"]
 # selected_columns = ['volume', 'open', 'high', 'low', 'close', 'chg', 'percent', 'turnoverrate', 'amount', 'pe', 'pb', 'ps', 'pcf', 'market_capital']
+TARGET_COLUMN = 'return'
 
-# 将DataFrame转换为数组: 使用.values属性将DataFrame转换为NumPy数组
-df_feature_train = df_train.loc[:, selected_columns].copy().values
-
-timestep = 10  # use days to predict next 1 day return
+# 数据分割
+df_train, df_test = train_test_split(df_data, test_size=0.2, shuffle=False)
 
 scaler = MinMaxScaler(feature_range=(0, 1))
-# 连续数据转为分类
 discretizer = KBinsDiscretizer(n_bins=10, encode='ordinal', strategy='quantile')
-df_feature_train = scaler.fit_transform(df_feature_train)
 
-# 调整数据形状以适应LSTM输入 (samples, timesteps, features)
-x_train = []
-y_train = []
-for i in range(timestep, df_feature_train.shape[0]):  # discard the last "timestep" days
-    x_train.append(df_feature_train[i - timestep:i])  # rolling_timestep * features
-    y_train.append(df_train[['return']].iloc[i].values)  # days * (no rolling_timestep) * features
-y_train = discretizer.fit_transform(y_train)
-x_train, y_train = np.array(x_train), np.array(y_train)
+# 处理训练集
+x_train, y_train = prepare_dataset(
+    df=df_train,
+    selected_features=SELECTED_FEATURES,
+    target_column=TARGET_COLUMN,
+    timesteps=TIMESTEPS,
+    x_scaler=scaler,
+    y_scaler=discretizer,
+    fit=True
+)
 
-# 将数据划分为训练集和测试集
-# (x_train, y_train)
-# (x_test, y_test)
-# x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.2, shuffle=False)
-
+# 处理测试集
+x_test, y_test = prepare_dataset(
+    df=df_test,
+    selected_features=SELECTED_FEATURES,
+    target_column=TARGET_COLUMN,
+    timesteps=TIMESTEPS,
+    x_scaler=scaler,
+    y_scaler=discretizer,
+    fit=False
+)
 # 转换为独热编码标签
 y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
 
 
 # 定义 LSTM 模型
 def create_model(hp):
     """根据超参数构建Keras模型"""
     model = Sequential()
-    model.add(LSTM(int(hp['units']), input_shape=(timestep, x_train.shape[2]), dropout=hp['dropout'], return_sequences=True))
+    model.add(LSTM(int(hp['units']), input_shape=(TIMESTEPS, x_train.shape[2]), dropout=hp['dropout'], return_sequences=True))
 
     # 添加LSTM层
     for i in range(hp['num_layers']):
@@ -96,7 +103,6 @@ def objective(hp):
         epochs=hp['epochs'],
         batch_size=int(hp['batch_size']),
         validation_split=0.2,
-        callbacks=[early_stop],
         verbose=0  # 减少训练输出
     )
     print(f"Val accuracy history: {history.history['val_accuracy']}")
@@ -104,14 +110,21 @@ def objective(hp):
     # 平均验证准确率
     # average_val_accuracy = np.mean(history.history['val_accuracy'])
     # return -average_val_accuracy
+
     # 最佳验证准确率（峰值）
     # max_val_accuracy = max(history.history['val_accuracy'])
     # return -max_val_accuracy
+
+    # 在测试集上评估最终模型
+    test_loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
+    return -test_acc  # 直接优化测试集准确率
+
     # 早停法最佳验证准确率
-    return -history.history['val_accuracy'][-1]
+    # return -history.history['val_accuracy'][-1]
 
 
 # 执行优化搜索
+# 100%|██████████| 50/50 [1:12:35<00:00, 87.11s/trial, best loss: -0.19745223224163055]
 trials = Trials()
 best = fmin(
     objective,
@@ -122,5 +135,6 @@ best = fmin(
 )
 
 # 输出最优超参数
+# 最优超参数：{'activation': 0, 'batch_size': 32.0, 'dropout': 0.1615750616970508, 'epochs': 2, 'learning_rate': 0.008699532172401157, 'num_layers': 2, 'units': 64.0}
 print(f'\n最优超参数：{best}')
 print(f'最佳验证准确率：{-best["result"]:.4f}')

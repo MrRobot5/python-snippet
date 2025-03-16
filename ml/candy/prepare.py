@@ -31,7 +31,8 @@ print(column_names_list)
 df.sort_values(by='timestamp', ascending=True, inplace=True)
 
 # 过滤timestamp大于'2022-01-01'的数据
-df = df[df['timestamp'] > '2019-01-01'][:500]
+# 预测简单的周期性数据或趋势较为明显的数据，可能几千条到几万条数据就可以构建一个效果不错的 LSTM 模型。
+df = df[df['timestamp'] > '2010-01-01'][:3000]
 print(df.head(10))
 min_ts = df['timestamp'].min()
 max_ts = df['timestamp'].max()
